@@ -1,0 +1,124 @@
+unit uFrmPrincipal;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Tabs, Vcl.StdCtrls,
+  Vcl.ComCtrls, Vcl.DBCtrls, Data.DB, Vcl.Grids, Vcl.DBGrids;
+
+type
+  TFrmPrincipal = class(TForm)
+    pnPrincipal: TPanel;
+    btCidades: TButton;
+    TabSet1: TTabSet;
+    btFechar: TButton;
+    btResultadoCidades: TButton;
+    pcPrincipal: TPageControl;
+    tabProvas: TTabSheet;
+    Label1: TLabel;
+    lbCidade: TLabel;
+    Button1: TButton;
+    DBGrid2: TDBGrid;
+    TabSheet3: TTabSheet;
+    Provas: TLabel;
+    DBLookupComboBox1: TDBLookupComboBox;
+    btConsultaProva: TButton;
+    DBGrid1: TDBGrid;
+    TabSheet1: TTabSheet;
+    procedure btFecharClick(Sender: TObject);
+    procedure btCidadesClick(Sender: TObject);
+    procedure btConsultaProvaClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure btResultadoCidadesClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmPrincipal: TFrmPrincipal;
+
+implementation
+
+{$R *.dfm}
+
+uses uDataModule;
+
+procedure TFrmPrincipal.btCidadesClick(Sender: TObject);
+begin
+   pcPrincipal.ActivePageIndex := 2;
+   dm.ProvasTable.Active;
+end;
+
+procedure TFrmPrincipal.btConsultaProvaClick(Sender: TObject);
+var
+  foo: Integer;
+begin
+  with dm.qrConsultaMarcas do
+  begin
+    Active := false;
+    foo := DBLookupComboBox1.ListSource.DataSet.FieldByName(DBLookupComboBox1.KeyField).Value;
+    ParamByName('pprova').AsInteger := DBLookupComboBox1.ListSource.DataSet.FieldByName(DBLookupComboBox1.KeyField).Value;
+    Active := true;
+  end;
+end;
+
+procedure TFrmPrincipal.btFecharClick(Sender: TObject);
+begin
+    Application.Terminate;
+end;
+
+procedure TFrmPrincipal.btResultadoCidadesClick(Sender: TObject);
+begin
+   pcPrincipal.ActivePageIndex := 1;
+   dm.ProvasTable.Active;
+
+end;
+
+procedure TFrmPrincipal.Button1Click(Sender: TObject);
+var
+  codCidade, posicao: Integer;
+begin
+
+  dm.qrClassificacaoCidades.Close;
+  dm.qrZerarResultadosCidades.ExecSQL;
+
+
+
+
+  dm.ProvasTable.Open;
+  while not dm.ProvasTable.Eof do
+  begin
+     lbCidade.Caption := dm.ProvasTable.FieldByName('nome').AsString;
+
+     dm.qrResultadoPorProva.Close;
+     dm.qrResultadoPorProva.ParamByName('pprova').AsInteger := dm.ProvasTable.FieldByName('codigo').AsInteger;
+     dm.qrResultadoPorProva.open;
+
+     while not dm.qrResultadoPorProva.Eof do
+     begin
+
+       dm.query.Close;
+
+       codCidade := dm.qrResultadoPorProva.FieldByName('cod_cidade').AsInteger;
+       posicao := dm.qrResultadoPorProva.FieldByName('posicao').AsInteger;
+
+       if (posicao = 1) then dm.query.sql.Text := 'update cidades set medalhas_ouro = medalhas_ouro + 1 where codigo = ' + IntToStr(codCidade);
+       if (posicao = 2) then dm.query.sql.Text := 'update cidades set medalhas_prata = medalhas_prata + 1 where codigo = ' + IntToStr(codCidade);
+       if (posicao = 3) then dm.query.sql.Text := 'update cidades set medalhas_bronze = medalhas_bronze + 1 where codigo = ' + IntToStr(codCidade);
+
+       dm.query.ExecSQL;
+
+       dm.qrResultadoPorProva.Next;
+     end;
+
+     dm.ProvasTable.Next;
+  end;
+
+  dm.qrClassificacaoCidades.Open;
+
+end;
+
+end.

@@ -1,0 +1,16 @@
+program jogosAbertos;
+
+uses
+  Vcl.Forms,
+  uFrmPrincipal in 'uFrmPrincipal.pas' {FrmPrincipal},
+  uDataModule in 'uDataModule.pas' {DataModule1: TDataModule};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TFrmPrincipal, FrmPrincipal);
+  Application.CreateForm(TDataModule1, DataModule1);
+  Application.Run;
+end.

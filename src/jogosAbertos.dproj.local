@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2024/03/09 19:44:38.000.455,=C:\Users\pc\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2024/03/09 19:45:20.000.638,C:\Users\pc\Documents\Embarcadero\Studio\Projects\Unit2.pas=C:\projetos\datainfo\jogosAbertos\uFrmPrincipal.pas</Transaction>
+    <Transaction>2024/03/09 19:45:20.000.638,C:\Users\pc\Documents\Embarcadero\Studio\Projects\Unit2.dfm=C:\projetos\datainfo\jogosAbertos\uFrmPrincipal.dfm</Transaction>
+    <Transaction>2024/03/09 19:45:50.000.218,C:\Users\pc\Documents\Embarcadero\Studio\Projects\Project2.dproj=C:\projetos\datainfo\jogosAbertos\src\Project2.dproj</Transaction>
+    <Transaction>2024/03/09 19:46:02.000.811,C:\projetos\datainfo\jogosAbertos\uFrmPrincipal.pas=C:\projetos\datainfo\jogosAbertos\src\uFrmPrincipal.pas</Transaction>
+    <Transaction>2024/03/09 19:46:02.000.811,C:\projetos\datainfo\jogosAbertos\uFrmPrincipal.dfm=C:\projetos\datainfo\jogosAbertos\src\uFrmPrincipal.dfm</Transaction>
+    <Transaction>2024/03/09 19:47:52.000.920,C:\projetos\datainfo\jogosAbertos\src\Project2.dproj=C:\projetos\datainfo\jogosAbertos\src\jogosAbertos.dproj</Transaction>
+    <Transaction>2024/03/10 17:49:01.000.848,=C:\projetos\datainfo\jogosAbertos\src\Unit1.pas</Transaction>
+    <Transaction>2024/03/10 17:49:57.000.276,C:\projetos\datainfo\jogosAbertos\src\uDataModule.pas=C:\projetos\datainfo\jogosAbertos\src\Unit1.pas</Transaction>
+    <Transaction>2024/03/10 17:49:57.000.276,C:\projetos\datainfo\jogosAbertos\src\uDataModule.dfm=C:\projetos\datainfo\jogosAbertos\src\Unit1.dfm</Transaction>
+  </Transactions>
+</BorlandProject>

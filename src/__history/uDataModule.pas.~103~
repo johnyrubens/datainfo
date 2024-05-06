@@ -1,0 +1,235 @@
+unit uDataModule;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Phys.SQLite,
+  FireDAC.Phys.SQLiteDef, FireDAC.Stan.ExprFuncs,
+  FireDAC.Phys.SQLiteWrapper.Stat, FireDAC.VCLUI.Wait, Data.DB,
+  FireDAC.Comp.Client, FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf,
+  FireDAC.DApt, FireDAC.Comp.DataSet;
+
+type
+  Tdm = class(TDataModule)
+    qrCriarTabelaCidade: TFDQuery;
+    qrCriarTabelaProvas: TFDQuery;
+    qrCriarTabelaMarcas: TFDQuery;
+    qrInsertCidade: TFDQuery;
+    jogosAbertosCon: TFDConnection;
+    qrInsertProva: TFDQuery;
+    qrInsertMarca: TFDQuery;
+    qrTruncaTabCidade: TFDQuery;
+    qrTruncaTabProva: TFDQuery;
+    qrTruncaTabMarcas: TFDQuery;
+    ProvasTable: TFDQuery;
+    dsProvas: TDataSource;
+    ProvasTablecodigo: TIntegerField;
+    ProvasTablenome: TWideStringField;
+    FDTransaction1: TFDTransaction;
+    qrConsultaMarcas: TFDQuery;
+    dsConsultaMarcas: TDataSource;
+    qrConsultaMarcasnome_atleta: TWideStringField;
+    qrConsultaMarcasnome: TWideStringField;
+    qrConsultaMarcasmarca: TFloatField;
+    qrConsultaMarcasposicao: TWideStringField;
+    qrConsultaMarcasclassificao: TWideStringField;
+    qrZerarResultadosCidades: TFDQuery;
+    qrResultadoPorProva: TFDQuery;
+    query: TFDQuery;
+    qrClassificacaoCidades: TFDQuery;
+    dsClassificacaoCidades: TDataSource;
+    qrClassificacaoCidadestotal_medalhas_ouro: TLargeintField;
+    qrClassificacaoCidadestotal_medalhas_prata: TLargeintField;
+    qrClassificacaoCidadestotal_medalhas_bronze: TLargeintField;
+    qrClassificacaoCidadesnome: TWideStringField;
+    dsResultadoPorProva: TDataSource;
+    qrResultadoPorProvacod_cidade: TIntegerField;
+    qrResultadoPorProvaposicao: TWideStringField;
+    procedure DataModuleCreate(Sender: TObject);
+    procedure DataModuleDestroy(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    caminhoArquivosTxt: String;
+    tabela: String;
+    falha: Boolean;
+    procedure PopularTabelaCidades;
+    procedure PopularTabelaProvas;
+    procedure PopularTabelaMarcas;
+  end;
+
+var
+  dm: Tdm;
+
+implementation
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+{$R *.dfm}
+
+procedure Tdm.DataModuleCreate(Sender: TObject);
+begin
+  caminhoArquivosTxt := 'c:\datainfo\jogosAbertos';
+  jogosAbertosCon.Connected;
+
+
+  qrCriarTabelaCidade.ExecSQL;
+  qrCriarTabelaProvas.ExecSQL;
+  qrCriarTabelaMarcas.ExecSQL;
+
+  //
+      qrTruncaTabMarcas.Active;
+      qrTruncaTabMarcas.ExecSQL;
+      qrTruncaTabMarcas.Active := false;
+
+      qrTruncaTabProva.Active;
+      qrTruncaTabProva.ExecSQL;
+      qrTruncaTabProva.Active := false;
+
+      qrTruncaTabCidade.Active;
+      qrTruncaTabCidade.ExecSQL;
+      qrTruncaTabCidade.Active := false;
+
+  //
+
+  PopularTabelaCidades;
+  PopularTabelaProvas;
+  PopularTabelaMarcas;
+
+end;
+
+procedure Tdm.DataModuleDestroy(Sender: TObject);
+begin
+     jogosAbertosCon.Connected := false;
+end;
+
+procedure Tdm.PopularTabelaCidades;
+var
+  arquivoTxtCidade: TStreamReader;
+  linha, codigo, nome: String;
+  posicaoFimLinha: Integer;
+begin
+  tabela := 'cidades.txt';
+  try
+    arquivoTxtCidade := TStreamReader.Create(caminhoArquivosTxt + '\' + tabela);
+    try
+
+      qrInsertCidade.Active;
+
+      while not arquivoTxtCidade.EndOfStream do
+      begin
+        linha :=  arquivoTxtCidade.ReadLine;
+        codigo := copy(linha, 1, 2);
+        nome := copy(linha, 3, 20);
+        qrInsertCidade.ParamByName('p_codigo').AsInteger := StrToInt(codigo);
+        qrInsertCidade.ParamByName('p_nome').AsString := nome;
+
+        qrInsertCidade.ExecSQL;
+       end;
+    finally
+      arquivoTxtCidade.Free;
+      falha := false;
+      qrInsertCidade.Close;
+    end;
+  except
+    on E: Exception do
+    begin
+      falha := true;
+    end;
+
+  end;
+end;
+
+procedure Tdm.PopularTabelaMarcas;
+var
+  arquivoTxt: TStringList;
+  linha, codatleta, atleta, codprova, codcidade, marcaStr, teste: String;
+  posicaoFimLinha, id, x1: Integer;
+  marca: Double;
+begin
+  tabela := 'marcas.txt';
+
+    try
+      //arquivoTxt := TStreamReader.Create(caminhoArquivosTxt + '\' + tabela);
+       arquivoTxt := TStringList.Create;
+       arquivoTxt.LoadFromFile(caminhoArquivosTxt + '\' + tabela);
+
+
+      qrInsertMarca.Active;
+
+      for id := 1 to arquivoTxt.Count - 1 do
+      begin
+           linha :=  arquivoTxt[id];
+           codatleta := copy(linha, 1, 5);
+           atleta := copy(linha, 6, 40);
+           codcidade := copy(linha, 47, 2);
+           codprova := copy(linha, 48, 3);
+           marcaStr := copy(linha, 51, 8);
+           marca := StrToFloat(StringReplace(marcaStr, ' ', '', [rfReplaceAll]));
+
+           qrInsertMarca.ParamByName('id').AsInteger := id;
+           qrInsertMarca.ParamByName('codigo_atleta').AsInteger := StrToInt(codatleta);
+           qrInsertMarca.ParamByName('p_atleta').AsString := trim(atleta);
+           qrInsertMarca.ParamByName('p_cod_cidade').AsInteger := StrToInt(trim(codcidade));
+           qrInsertMarca.ParamByName('p_cod_prova').AsInteger := StrToInt(trim(codprova));
+
+           qrInsertMarca.ParamByName('p_marca').AsFloat := marca;
+           qrInsertMarca.ExecSQL;
+
+      end;
+
+    finally
+      arquivoTxt.Free;
+      qrInsertMarca.Active := False;
+      falha := false;
+    end;
+
+
+end;
+
+procedure Tdm.PopularTabelaProvas;
+var
+  arquivoTxtCidade: TStreamReader;
+  linha, codigo, nome, tipo: String;
+  posicaoFimLinha: Integer;
+begin
+  tabela := 'provas.txt';
+  try
+
+    arquivoTxtCidade := TStreamReader.Create(caminhoArquivosTxt + '\' + tabela);
+
+    try
+
+      qrInsertProva.Active;
+
+      while not arquivoTxtCidade.EndOfStream do
+      begin
+        linha :=  arquivoTxtCidade.ReadLine;
+        codigo := copy(linha, 1, 3);
+        nome := copy(linha, 4, 29);
+        tipo := copy(linha, 34, 1);
+        qrInsertProva.ParamByName('p_codigo').AsInteger := StrToInt(codigo);
+        qrInsertProva.ParamByName('p_nome').AsString := nome;
+        qrInsertProva.ParamByName('p_tipo_prova').AsString := tipo;
+
+        qrInsertProva.ExecSQL;
+       end;
+    finally
+      arquivoTxtCidade.Free;
+      qrInsertProva.Active := False;
+      falha := false;
+    end;
+  except
+    on E: Exception do
+    begin
+      falha := true;
+    end;
+
+  end;
+
+end;
+
+end.
