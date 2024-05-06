@@ -328,7 +328,7 @@ object dm: Tdm
       'ORDER by consulta.posicao'
       'limit 3')
     Left = 520
-    Top = 80
+    Top = 56
     ParamData = <
       item
         Name = 'PPROVA'
@@ -347,17 +347,22 @@ object dm: Tdm
   end
   object query: TFDQuery
     Connection = jogosAbertosCon
-    Left = 496
-    Top = 240
+    Left = 400
+    Top = 208
   end
   object qrClassificacaoCidades: TFDQuery
     Connection = jogosAbertosCon
     SQL.Strings = (
       
-        'select consulta.nome, consulta.total_medalhas_ouro, consulta.tot' +
-        'al_medalhas_prata, consulta.total_medalhas_bronze'
+        'select consulta.codcidade, consulta.nome, consulta.total_medalha' +
+        's_ouro, consulta.total_medalhas_prata, consulta.total_medalhas_b' +
+        'ronze,'
+      
+        '        RANK() OVER (ORDER BY consulta.total_medalhas_ouro desc,' +
+        ' consulta.total_medalhas_prata desc, consulta.total_medalhas_bro' +
+        'nze desc) as posicao'
       'from ('
-      'select c.nome,  '
+      'select c.codigo AS codcidade, c.nome,  '
       
         '     (select sum(mo.medalhas_ouro) from cidades mo where mo.codi' +
         'go = c.codigo  ) as total_medalhas_ouro,'
@@ -372,9 +377,7 @@ object dm: Tdm
       
         'where not (consulta.total_medalhas_ouro = 0 and consulta.total_m' +
         'edalhas_prata = 0 and consulta.total_medalhas_bronze = 0)'
-      
-        'order by consulta.total_medalhas_ouro desc, consulta.total_medal' +
-        'has_prata desc , consulta.total_medalhas_bronze desc')
+      '')
     Left = 544
     Top = 344
     object qrClassificacaoCidadesnome: TWideStringField
@@ -408,6 +411,20 @@ object dm: Tdm
       ProviderFlags = []
       ReadOnly = True
     end
+    object qrClassificacaoCidadescodcidade: TIntegerField
+      FieldName = 'codcidade'
+      Origin = 'codigo'
+      ProviderFlags = [pfInUpdate, pfInWhere, pfInKey]
+      Required = True
+    end
+    object qrClassificacaoCidadesposicao: TLargeintField
+      AutoGenerateValue = arDefault
+      DisplayLabel = 'Posi'#231#227'o'
+      FieldName = 'posicao'
+      Origin = 'posicao'
+      ProviderFlags = []
+      ReadOnly = True
+    end
   end
   object dsClassificacaoCidades: TDataSource
     DataSet = qrClassificacaoCidades
@@ -416,7 +433,88 @@ object dm: Tdm
   end
   object dsResultadoPorProva: TDataSource
     DataSet = qrResultadoPorProva
-    Left = 560
-    Top = 160
+    Left = 520
+    Top = 112
+  end
+  object qrRestultadProvas: TFDQuery
+    Connection = jogosAbertosCon
+    SQL.Strings = (
+      
+        'select consulta.codigo_atleta, consulta.nome_atleta, consulta.no' +
+        'me, consulta.marca, consulta.posicao,'
+      '       (case when consulta.posicao = 1 then '#39'VENCEDOR'#39
+      '             when consulta.posicao = 2 then '#39'2 lugar'#39
+      '             when consulta.posicao = 3 then '#39'3 lugar'#39
+      '             else '#39#39
+      '       end) classificao'
+      'from ('
+      'select a.codigo_atleta, a.nome_atleta, b.nome, a.marca,'
+      
+        '       (case when c.tipo_prova = '#39'-'#39' then RANK() OVER (ORDER BY ' +
+        'marca) '
+      
+        '            when c.tipo_prova = '#39'+'#39' then RANK() OVER (ORDER BY m' +
+        'arca desc) '
+      '        end) as posicao'
+      'from marcas as a'
+      'left join cidades b on (b.codigo = a.cod_cidade)'
+      'left join provas c on (c.codigo = a.cod_prova)'
+      'where a.cod_prova = :pprova'
+      ') consulta'
+      'ORDER by consulta.posicao'
+      'limit 3')
+    Left = 64
+    Top = 448
+    ParamData = <
+      item
+        Name = 'PPROVA'
+        DataType = ftInteger
+        ParamType = ptInput
+        Value = 1
+      end>
+    object qrRestultadProvascodigo_atleta: TIntegerField
+      FieldName = 'codigo_atleta'
+      Origin = 'codigo_atleta'
+      Required = True
+    end
+    object qrRestultadProvasnome_atleta: TWideStringField
+      FieldName = 'nome_atleta'
+      Origin = 'nome_atleta'
+      Required = True
+      Size = 40
+    end
+    object qrRestultadProvasnome: TWideStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'nome'
+      Origin = 'nome'
+      ProviderFlags = []
+      ReadOnly = True
+      Size = 30
+    end
+    object qrRestultadProvasmarca: TFloatField
+      FieldName = 'marca'
+      Origin = 'marca'
+      Required = True
+    end
+    object qrRestultadProvasposicao: TLargeintField
+      AutoGenerateValue = arDefault
+      FieldName = 'posicao'
+      Origin = 'posicao'
+      ProviderFlags = []
+      ReadOnly = True
+    end
+    object qrRestultadProvasclassificao: TWideStringField
+      AutoGenerateValue = arDefault
+      FieldName = 'classificao'
+      Origin = 'classificao'
+      ProviderFlags = []
+      ReadOnly = True
+      Size = 32767
+    end
+  end
+  object dsRestultadProvas: TDataSource
+    DataSet = qrRestultadProvas
+    Left = 200
+    Top = 448
   end
 end

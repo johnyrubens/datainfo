@@ -1,0 +1,9 @@
+    0TRINIAPOLIS             3    0    0    1
+    5CURITIBA                2    1    0    2
+    4CASCAVEL                2    0    2    3
+    8APUCARANA               1    2    1    4
+    6LONDRINA                1    1    0    5
+    3SARANDI                 1    0    2    6
+    1MARINGA                 0    3    2    7
+    2PINHAIS                 0    3    0    8
+    7UMUARAMA                0    0    3    9

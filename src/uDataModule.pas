@@ -47,6 +47,16 @@ type
     qrConsultaMarcasposicao: TLargeintField;
     qrConsultaMarcasclassificao: TWideStringField;
     qrResultadoPorProvaposicao: TLargeintField;
+    qrClassificacaoCidadescodcidade: TIntegerField;
+    qrClassificacaoCidadesposicao: TLargeintField;
+    qrRestultadProvas: TFDQuery;
+    dsRestultadProvas: TDataSource;
+    qrRestultadProvascodigo_atleta: TIntegerField;
+    qrRestultadProvasnome_atleta: TWideStringField;
+    qrRestultadProvasnome: TWideStringField;
+    qrRestultadProvasmarca: TFloatField;
+    qrRestultadProvasposicao: TLargeintField;
+    qrRestultadProvasclassificao: TWideStringField;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
   private
@@ -78,25 +88,21 @@ begin
   caminhoArquivosTxt := 'c:\datainfo\';
   jogosAbertosCon.Connected;
 
-
   qrCriarTabelaCidade.ExecSQL;
   qrCriarTabelaProvas.ExecSQL;
   qrCriarTabelaMarcas.ExecSQL;
 
-  //
-      qrTruncaTabMarcas.Active;
-      qrTruncaTabMarcas.ExecSQL;
-      qrTruncaTabMarcas.Active := false;
+  qrTruncaTabMarcas.Active;
+  qrTruncaTabMarcas.ExecSQL;
+  qrTruncaTabMarcas.Active := false;
 
-      qrTruncaTabProva.Active;
-      qrTruncaTabProva.ExecSQL;
-      qrTruncaTabProva.Active := false;
+  qrTruncaTabProva.Active;
+  qrTruncaTabProva.ExecSQL;
+  qrTruncaTabProva.Active := false;
 
-      qrTruncaTabCidade.Active;
-      qrTruncaTabCidade.ExecSQL;
-      qrTruncaTabCidade.Active := false;
-
-  //
+  qrTruncaTabCidade.Active;
+  qrTruncaTabCidade.ExecSQL;
+  qrTruncaTabCidade.Active := false;
 
   PopularTabelaCidades;
   PopularTabelaProvas;
